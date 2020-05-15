@@ -95,6 +95,7 @@ export default {
                 .then((userResponse) => {
                     let currentUser = {name: userResponse.data.name, authToken: loginResponse.data.token};
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    this.$http.defaults.headers.common['Authorization'] = loginResponse.data.token;
                     $('#loginUserModal').modal('toggle');
                     this.isLoggedIn();
                 })
