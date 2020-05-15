@@ -13,7 +13,7 @@
                     <td>Photo</td>
                 </tr>
                 <tr v-for="petition in petitions">
-                    <td>{{ petition.title }}</td>
+                    <td><router-link :to="{ name: 'petition', params: { petitionId: petition.petitionId }}">{{ petition.title }}</router-link></td>
                     <td>{{ petition.category }}</td>
                     <td>{{ petition.authorName }}</td>
                     <td>{{ petition.signatureCount }}</td>

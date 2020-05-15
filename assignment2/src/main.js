@@ -18,10 +18,12 @@ const routes = [
         component: Home
     },
     {
+        name: "petitions",
         path: "/petitions",
         component: Petitions
     },
     {
+        name: "petition",
         path: "/petitions/:petitionId",
         component: Petition
     }
