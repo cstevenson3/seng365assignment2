@@ -5,9 +5,21 @@
         </div>
         <div id="petitions">
             <table>
+                <tr>
+                    <td>Title</td>
+                    <td>Category</td>
+                    <td>Author</td>
+                    <td>Signatures</td>
+                    <td>Photo</td>
+                </tr>
                 <tr v-for="petition in petitions">
                     <td>{{ petition.title }}</td>
-                    <td><!--- view link here --></td>
+                    <td>{{ petition.category }}</td>
+                    <td>{{ petition.authorName }}</td>
+                    <td>{{ petition.signatureCount }}</td>
+                    <td>
+                        <img :src=petitionPhoto(petition.petitionId) height="200" width="200">
+                    </td>
                 </tr>
             </table>
         </div>
@@ -21,7 +33,7 @@ export default {
                 error: "",
                 errorFlag: false,
                 petitions: []
-                }
+        }
     },
 
     mounted: function() {
@@ -38,6 +50,10 @@ export default {
                 this.error = error;
                 this.errorFlag = true;
             });
+        },
+
+        petitionPhoto: function(petitionId) {
+            return "http://localhost:4941/api/v1/petitions/" + petitionId + "/photo";
         }
     }
 }
