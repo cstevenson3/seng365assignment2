@@ -47,7 +47,11 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        aaaa
+                        <form @submit.prevent v-on:submit="loginUser(); return false;">
+                            <input v-model="email" placeholder="email" />
+                            <input v-model="password" placeholder="password" />
+                            <input type="submit" value="Login"/>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -70,8 +74,6 @@ export default {
     },
 
     mounted: function() {
-        localStorage.setItem('currentUser', JSON.stringify(null));
-        //localStorage.setItem('currentUser', JSON.stringify({username:"a username"}));
     },
 
     methods: {
@@ -80,7 +82,31 @@ export default {
         },
 
         currentUser: function () {
-            return (JSON.parse(localStorage.getItem('currentUser'))).username;
+            console.log(localStorage.getItem('currentUser'));
+            return (JSON.parse(localStorage.getItem('currentUser'))).name;
+        },
+
+        loginUser: function () {
+            console.log("here1");
+            console.log(this.email);
+            this.$http.post('http://localhost:4941/api/v1/users/login', {email: this.email, password: this.password})
+            .then((loginResponse) => {
+                console.log("here2");
+                this.$http.get('http://localhost:4941/api/v1/users/' + loginResponse.data.userId)
+                .then((userResponse) => {
+                    console.log("here3");
+                    let currentUser = {name: userResponse.data.name, authToken: loginResponse.data.token};
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                })
+                .catch((error) => {
+                    this.error = error;
+                    this.errorFlag = true;
+                });
+            })
+            .catch((error) => {
+                this.error = error;
+                this.errorFlag = true;
+            });
         }
     }
 }
