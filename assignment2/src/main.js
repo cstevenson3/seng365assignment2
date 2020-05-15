@@ -10,6 +10,7 @@ Vue.use(VueAxios, axios);
 import App from './App.vue';
 import Home from './Home.vue';
 import Petitions from './Petitions.vue';
+import Petition from './Petition.vue';
 
 const routes = [
     {
@@ -19,6 +20,10 @@ const routes = [
     {
         path: "/petitions",
         component: Petitions
+    },
+    {
+        path: "/petitions/:petitionId",
+        component: Petition
     }
 ];
 
