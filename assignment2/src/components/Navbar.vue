@@ -5,15 +5,15 @@
             d
             </div>
             <div style="float:right;background-color:#00FF00;width:auto;">
-                <div style="float:left;" v-if="isLoggedIn()">
+                <div style="float:left;" v-if="loggedIn">
                     Logged in as {{ currentUser() }}
                 </div>
 
-                <div style="float:left;" v-if="isLoggedIn()">
+                <div style="float:left;" v-if="loggedIn">
                     Logout
                 </div>
 
-                <div style="float:left;" v-if="!isLoggedIn()">
+                <div style="float:left;" v-if="!loggedIn">
                     <button 
                     type="button" 
                     class="btn btn-primary" 
@@ -23,7 +23,7 @@
                     </button>   
                 </div>
 
-                <div style="float:left;" v-if="!isLoggedIn()">
+                <div style="float:left;" v-if="!loggedIn">
                     Register
                 </div>
             </div>
@@ -69,34 +69,34 @@ export default {
     data () {
         return {
                 error: "",
-                errorFlag: false
+                errorFlag: false,
+                loggedIn: false
         }
     },
 
     mounted: function() {
+        this.isLoggedIn();
     },
 
     methods: {
         isLoggedIn: function() {
-            return JSON.parse(localStorage.getItem('currentUser')) != null;
+            console.log(JSON.parse(localStorage.getItem('currentUser')) != null);
+            this.loggedIn = JSON.parse(localStorage.getItem('currentUser')) != null;
         },
 
         currentUser: function () {
-            console.log(localStorage.getItem('currentUser'));
             return (JSON.parse(localStorage.getItem('currentUser'))).name;
         },
 
         loginUser: function () {
-            console.log("here1");
-            console.log(this.email);
             this.$http.post('http://localhost:4941/api/v1/users/login', {email: this.email, password: this.password})
             .then((loginResponse) => {
-                console.log("here2");
                 this.$http.get('http://localhost:4941/api/v1/users/' + loginResponse.data.userId)
                 .then((userResponse) => {
-                    console.log("here3");
                     let currentUser = {name: userResponse.data.name, authToken: loginResponse.data.token};
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    $('#loginUserModal').modal('toggle');
+                    this.isLoggedIn();
                 })
                 .catch((error) => {
                     this.error = error;
