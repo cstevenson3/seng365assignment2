@@ -49,7 +49,6 @@ export default {
     },
 
     mounted: function() {
-        console.log(Object.keys(window));
         this.getPetition();
         this.getSignatures();
     },
