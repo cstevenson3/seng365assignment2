@@ -6,7 +6,14 @@
             </div>
             <div style="float:right;background-color:#00FF00;width:auto;">
                 <div style="float:left;" v-if="loggedIn">
-                    Logged in as {{ currentUser() }}
+                    <button 
+                    type="button" 
+                    class="btn btn-primary"
+                    v-on:click="fillEditDetails();"
+                    data-toggle="modal"
+                    data-target="#editUserModal">
+                        {{ currentUserName() }}
+                    </button>
                 </div>
 
                 <div style="float:left;" v-if="loggedIn">
@@ -109,6 +116,43 @@
                 </div>
             </div>
         </div>
+
+        <div 
+        class="modal fade" 
+        id="editUserModal" 
+        tabindex="-1" 
+        role="dialog"
+        aria-labelledby="editUserModalLabel" 
+        aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUserModalLabel">Edit Profile</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent v-on:submit="editUser(); return false;">
+                            <input v-model="editEmail" placeholder="email" />
+                            <input v-model="editPassword" placeholder="password" type="password" />
+                            <input v-model="editName" placeholder="name" />
+                            <input v-model="editCity" placeholder="city" />
+                            <input v-model="editCountry" placeholder="country" />
+                            <input type="file" id="editImageInput" ref="editImage" v-on:change="handleUserEditImage()"/>
+                            <div id="result"></div>
+                            <input type="submit" value="Save"/>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -118,7 +162,9 @@ export default {
         return {
             error: "",
             errorFlag: false,
+
             loggedIn: false,
+            currentUser: null,
 
             loginEmail: "",
             loginPassword: "",
@@ -129,9 +175,19 @@ export default {
             registerCity: "",
             registerCountry: "",
 
+            editEmail: "",
+            editPassword: "",
+            editName: "",
+            editCity: "",
+            editCountry: "",
+
             registerImage: '',
             registerImageData: null,
-            registerImageType: ""
+            registerImageType: "",
+
+            editImage: '',
+            editImageData: null,
+            editImageType: ""
         }
     },
 
@@ -141,18 +197,19 @@ export default {
 
     methods: {
         isLoggedIn: function() {
-            this.loggedIn = JSON.parse(localStorage.getItem('currentUser')) != null;
+            this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            this.loggedIn = this.currentUser != null;
+            this.$http.defaults.headers.common['X-Authorization'] = this.currentUser.authToken;
             return this.loggedIn;
         },
 
-        currentUser: function () {
+        currentUserName: function () {
             return (JSON.parse(localStorage.getItem('currentUser'))).name;
         },
 
-        saveLoginData: function(name, token) {
-            let currentUser = {name: name, authToken: token};
+        saveLoginData: function(id, token, name) {
+            let currentUser = {userId: id, authToken: token, name: name};
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            this.$http.defaults.headers.common['X-Authorization'] = token;
             this.isLoggedIn();
         },
 
@@ -167,7 +224,7 @@ export default {
             .then((loginResponse) => {
                 this.$http.get('http://localhost:4941/api/v1/users/' + loginResponse.data.userId)
                 .then((userResponse) => {
-                    this.saveLoginData(userResponse.data.name, loginResponse.data.token);
+                    this.saveLoginData(loginResponse.data.userId, loginResponse.data.token, userResponse.data.name);
                     $('#loginUserModal').modal('toggle');
                 })
                 .catch((error) => {
@@ -192,6 +249,19 @@ export default {
                 vueInstance.registerImageData = array;
             }
             reader.readAsArrayBuffer(this.registerImage);
+        },
+
+        handleUserEditImage: function () {
+            this.editImage = this.$refs.editImage.files[0];
+            this.editImageType = this.editImage.type;
+            let reader = new FileReader();
+            let vueInstance = this;
+            reader.onload = function() {
+                let arrayBuffer = this.result;
+                let array = new Uint8Array(arrayBuffer);
+                vueInstance.editImageData = array;
+            }
+            reader.readAsArrayBuffer(this.editImage);
         },
 
         registerUser: function () {
@@ -228,7 +298,7 @@ export default {
                 .then((loginResponse) => {
                     this.$http.get('http://localhost:4941/api/v1/users/' + registerResponse.data.userId)
                     .then((userResponse) => {
-                        this.saveLoginData(userResponse.data.name, loginResponse.data.token);
+                        this.saveLoginData(loginResponse.data.userId, loginResponse.data.token, userResponse.data.name);
                         if(uploadImage) {
                             this.$http.put('http://localhost:4941/api/v1/users/' + registerResponse.data.userId + '/photo', this.registerImageData, {headers: {"Content-Type": this.registerImageType}})                            
                             .then((imageResponse) => {
@@ -254,6 +324,70 @@ export default {
                 });
             })
             .catch((error) => {
+                this.error = error;
+                this.errorFlag = true;
+            });
+        },
+
+        fillEditDetails: function () {
+            this.isLoggedIn();
+            this.$http.get('http://localhost:4941/api/v1/users/' + this.currentUser.userId)
+            .then((userResponse) => {
+                this.editEmail = userResponse.data.email;
+                this.editName = userResponse.data.name;
+                this.editCity = userResponse.data.city ? userResponse.data.city : "";
+                this.editCountry = userResponse.data.country ? userResponse.data.country : "";
+            })
+            .catch((error) => {
+                this.error = error;
+                this.errorFlag = true;
+            });
+        },
+
+        editUser: function () {
+            let data = {};
+            if(this.editEmail == "") {
+                alert("Email is required");
+                return;
+            }
+            if(this.editName == "") {
+                alert("Name is required");
+                return;
+            }
+            data.email = this.editEmail;
+            data.name = this.editName;
+
+            if(this.editPassword != "") {
+                data.password = this.editPassword;
+            }
+            if(this.editCity != "") {
+                data.city = this.editCity;
+            }
+            if(this.editCountry != "") {
+                data.country = this.editCountry;
+            }
+            let uploadImage = false;
+            if(this.editImageData != null) {
+                uploadImage = true;
+            }
+
+            this.$http.patch('http://localhost:4941/api/v1/users/' + this.currentUser.userId, data)
+            .then((patchResponse) => {
+                alert("Profile saved");
+                if(uploadImage) {
+                    this.$http.put('http://localhost:4941/api/v1/users/' + this.currentUser.userId + '/photo', this.editImageData, {headers: {"Content-Type": this.editImageType}})                            
+                    .then((imageResponse) => {
+                        alert("New image saved");
+                    })
+                    .catch((error) => {
+                        alert("Failed to upload profile image");
+                        this.error = error;
+                        this.errorFlag = true;
+                    });
+                }
+            })
+            .catch((error) => {
+                console.log(error);
                 this.error = error;
                 this.errorFlag = true;
             });
