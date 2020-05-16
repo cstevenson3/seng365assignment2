@@ -10,7 +10,12 @@
                 </div>
 
                 <div style="float:left;" v-if="loggedIn">
-                    Logout
+                    <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    v-on:click="logout();">
+                        Logout
+                    </button>
                 </div>
 
                 <div style="float:left;" v-if="!loggedIn">
@@ -151,6 +156,12 @@ export default {
             this.isLoggedIn();
         },
 
+        logout: function () {
+            localStorage.setItem('currentUser', JSON.stringify(null));
+            this.$http.defaults.headers.common['X-Authorization'] = undefined;
+            this.isLoggedIn();
+        },
+
         loginUser: function () {
             this.$http.post('http://localhost:4941/api/v1/users/login', {email: this.loginEmail, password: this.loginPassword})
             .then((loginResponse) => {
@@ -178,7 +189,6 @@ export default {
             reader.onload = function() {
                 let arrayBuffer = this.result;
                 let array = new Uint8Array(arrayBuffer);
-                let binaryString = String.fromCharCode.apply(null, array);
                 vueInstance.registerImageData = array;
             }
             reader.readAsArrayBuffer(this.registerImage);
@@ -220,12 +230,12 @@ export default {
                     .then((userResponse) => {
                         this.saveLoginData(userResponse.data.name, loginResponse.data.token);
                         if(uploadImage) {
-                            console.log(this.registerImageData);
                             this.$http.put('http://localhost:4941/api/v1/users/' + registerResponse.data.userId + '/photo', this.registerImageData, {headers: {"Content-Type": this.registerImageType}})                            
                             .then((imageResponse) => {
-                                console.log("Image uploaded");
+                                //image uploaded
                             })
                             .catch((error) => {
+                                alert("Account has been registered, but failed to upload profile image");
                                 console.log(error);
                                 this.error = error;
                                 this.errorFlag = true;
