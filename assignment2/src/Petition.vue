@@ -12,6 +12,8 @@
             <h3> {{ petition.closingDate ? "Closes " + Date(petition.closingDate) : "Closing date not set" }}</h3>
             <h3>Opened {{ Date(petition.createdDate) }}</h3>
             <img :src=petitionPhoto(petition.petitionId) height="200" width="200">
+            <br>
+            {{ petition.description }}
         </div>
         <br>
         <div>

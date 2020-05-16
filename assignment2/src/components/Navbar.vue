@@ -2,8 +2,18 @@
     <div>
         <div style="height:auto;width:100%;display:block;background-color:#FF0000">
             <div style="background-color:#0000FF;float:left;width:auto;">
-            d
+                <div style="float:left;" v-if="loggedIn">
+                    <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    v-on:click="fillCreatePetitionDetails();" 
+                    data-toggle="modal" 
+                    data-target="#createPetitionModal"> 
+                        Create Petition
+                    </button>
+                </div>
             </div>
+
             <div style="float:right;background-color:#00FF00;width:auto;">
                 <div style="float:left;" v-if="loggedIn">
                     <button 
@@ -46,6 +56,50 @@
                 </div>
             </div>
             <div style="clear:both;"></div>
+        </div>
+
+        <div 
+        class="modal fade" 
+        id="createPetitionModal" 
+        tabindex="-1" 
+        role="dialog"
+        aria-labelledby="createPetitionModalLabel" 
+        aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPetitionModalLabel">Create Petition</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent v-on:submit="createPetition(); return false;">
+                            <input v-model="petitionTitle" placeholder="title" />
+                            <textarea v-model="petitionDescription" placeholder="description" rows="5" cols="50"/>
+                            <br>
+                            <h5>Category</h5>           
+                            <div v-for="category in petitionCategories">
+                                <input v-model="petitionCategory" type="radio" name="category" v-bind:value=category.categoryId>
+                                <label for=category.categoryId>{{category.name}}</label><br>
+                            </div>
+                            
+                            <br>
+                            <label for="petitionClosingDate">Closing Date</label>
+                            <input id="petitionClosingDate" type="date" v-model="petitionClosingDate" />
+                            <input type="file" id="petitionImageInput" ref="petitionImage" v-on:change="handlePetitionImage()"/>
+                            <div id="result"></div>
+                            <input type="submit" value="Create Petition"/>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div 
@@ -166,6 +220,12 @@ export default {
             loggedIn: false,
             currentUser: null,
 
+            petitionTitle:"",
+            petitionDescription:"",
+            petitionCategory: "",
+            petitionCategories: [],
+            petitionClosingDate:"",
+
             loginEmail: "",
             loginPassword: "",
 
@@ -180,6 +240,10 @@ export default {
             editName: "",
             editCity: "",
             editCountry: "",
+
+            petitionImage: '',
+            petitionImageData: null,
+            petitionImageType: "",
 
             registerImage: '',
             registerImageData: null,
@@ -219,6 +283,60 @@ export default {
             this.isLoggedIn();
         },
 
+        fillCreatePetitionDetails: function() {
+            this.$http.get('http://localhost:4941/api/v1/petitions/categories')
+            .then((categoriesResponse) => {
+                this.petitionCategories = categoriesResponse.data;
+            })
+            .catch((error) => {
+                this.error = error;
+                this.errorFlag = true;
+            });
+        },
+
+        createPetition: function() {
+            let data = {};
+            if(this.petitionTitle == "") {
+                alert("Title is required");
+                return;
+            }
+            if(this.petitionCategory == "") {
+                alert("Category is required");
+                return;
+            }
+            data.title = this.petitionTitle;
+            data.categoryId = this.petitionCategory;
+            console.log(data.categoryId);
+            if(this.description != "") {
+                data.description = this.petitionDescription;
+            }
+            let uploadImage = false;
+            if(this.petitionImageData != null) {
+                uploadImage = true;
+            }
+
+            this.$http.post('http://localhost:4941/api/v1/petitions', data)
+            .then((petitionResponse) => {
+                if(uploadImage) {
+                    this.$http.put('http://localhost:4941/api/v1/petitions/' + petitionResponse.data.petitionId + '/photo', this.petitionImageData, {headers: {"Content-Type": this.petitionImageType}})                            
+                    .then((imageResponse) => {
+                        window.location.href = '/petitions/' + petitionResponse.data.petitionId;
+                    })
+                    .catch((error) => {
+                        this.error = error;
+                        this.errorFlag = true;
+                        window.location.href = '/petitions/' + petitionResponse.data.petitionId;
+                    });
+                } else {
+                    window.location.href = '/petitions/' + petitionResponse.data.petitionId;
+                }
+            })
+            .catch((error) => {
+                this.error = error;
+                this.errorFlag = true;
+            });
+        },
+
         loginUser: function () {
             this.$http.post('http://localhost:4941/api/v1/users/login', {email: this.loginEmail, password: this.loginPassword})
             .then((loginResponse) => {
@@ -249,6 +367,19 @@ export default {
                 vueInstance.registerImageData = array;
             }
             reader.readAsArrayBuffer(this.registerImage);
+        },
+
+        handlePetitionImage: function() {
+            this.petitionImage = this.$refs.petitionImage.files[0];
+            this.petitionImageType = this.petitionImage.type;
+            let reader = new FileReader();
+            let vueInstance = this;
+            reader.onload = function() {
+                let arrayBuffer = this.result;
+                let array = new Uint8Array(arrayBuffer);
+                vueInstance.petitionImageData = array;
+            }
+            reader.readAsArrayBuffer(this.petitionImage);
         },
 
         handleUserEditImage: function () {
