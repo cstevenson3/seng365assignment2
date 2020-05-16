@@ -114,8 +114,19 @@ export default {
             error: "",
             errorFlag: false,
             loggedIn: false,
+
+            loginEmail: "",
+            loginPassword: "",
+
+            registerEmail: "",
+            registerPassword: "",
+            registerName: "",
+            registerCity: "",
+            registerCountry: "",
+
             registerImage: '',
-            registerImageData: null
+            registerImageData: null,
+            registerImageType: ""
         }
     },
 
@@ -134,11 +145,9 @@ export default {
         },
 
         saveLoginData: function(name, token) {
-            console.log("h");
             let currentUser = {name: name, authToken: token};
-            console.log(currentUser);
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            this.$http.defaults.headers.common['Authorization'] = token;
+            this.$http.defaults.headers.common['X-Authorization'] = token;
             this.isLoggedIn();
         },
 
@@ -162,22 +171,20 @@ export default {
         },
 
         handleUserRegisterImage: function () {
-            console.log(this);
             this.registerImage = this.$refs.registerImage.files[0];
+            this.registerImageType = this.registerImage.type;
             let reader = new FileReader();
             let vueInstance = this;
             reader.onload = function() {
-                console.log(vueInstance);
                 let arrayBuffer = this.result;
                 let array = new Uint8Array(arrayBuffer);
                 let binaryString = String.fromCharCode.apply(null, array);
-                vueInstance.registerImageData = binaryString;
+                vueInstance.registerImageData = array;
             }
             reader.readAsArrayBuffer(this.registerImage);
         },
 
         registerUser: function () {
-            console.log(this);
             let data = {};
             if(this.registerEmail == "") {
                 alert("Email is required");
@@ -201,33 +208,20 @@ export default {
                 data.country = this.registerCountry;
             }
             let uploadImage = false;
-            console.log(this.registerImageData);
             if(this.registerImageData != null) {
-                console.log("here");
                 uploadImage = true;
             }
 
             this.$http.post('http://localhost:4941/api/v1/users/register', data)
             .then((registerResponse) => {
-                console.log("login part");
                 this.$http.post('http://localhost:4941/api/v1/users/login', {email: data.email, password: data.password})
                 .then((loginResponse) => {
-                    console.log("user part");
                     this.$http.get('http://localhost:4941/api/v1/users/' + registerResponse.data.userId)
                     .then((userResponse) => {
-                        console.log("image part");
-                        console.log("front");
                         this.saveLoginData(userResponse.data.name, loginResponse.data.token);
-                        console.log("back");
-                        console.log(uploadImage);
                         if(uploadImage) {
-                            console.log("image if");
-                            this.$http.put({
-                                                method: 'put',
-                                                url: 'http://localhost:4941/api/v1/users/' + registerResponse.data.userId + "/photo",
-                                                data: this.registerImageData
-                                            }
-                            )
+                            console.log(this.registerImageData);
+                            this.$http.put('http://localhost:4941/api/v1/users/' + registerResponse.data.userId + '/photo', this.registerImageData, {headers: {"Content-Type": this.registerImageType}})                            
                             .then((imageResponse) => {
                                 console.log("Image uploaded");
                             })
