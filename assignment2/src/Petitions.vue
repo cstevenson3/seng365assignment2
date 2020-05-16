@@ -18,7 +18,7 @@
                     <td>{{ petition.authorName }}</td>
                     <td>{{ petition.signatureCount }}</td>
                     <td>
-                        <img :src=petitionPhoto(petition.petitionId) height="200" width="200">
+                        <img :src=petitionPhoto(petition.petitionId) height="40" width="40">
                     </td>
                 </tr>
             </table>

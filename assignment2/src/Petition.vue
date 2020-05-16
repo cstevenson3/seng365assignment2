@@ -14,9 +14,30 @@
             <img :src=petitionPhoto(petition.petitionId) height="200" width="200">
         </div>
         <br>
+        <div>
+            <div style="float: left">
+                <h2>Share:</h2>
+            </div>
+            <div style="float: left">
+                <a href="https://www.facebook.com" target="_blank">
+                <img src="https://www.facebook.com/favicon.ico" width="40" height="40">
+                </a>
+            </div>
+            <div style="float: left">
+                <a href="https://www.twitter.com" target="_blank">
+                <img src="https://www.twitter.com/favicon.ico" width="40" height="40">
+                </a>
+            </div>
+            <div style="float: left">
+                <a href="https://www.reddit.com" target="_blank">
+                <img src="https://www.reddit.com/favicon.ico" width="40" height="40">
+                </a>
+            </div>
+            <div style="clear:both;"></div>
+        </div
         <br>
         <div>
-            Signatures
+            <h2>Signatures</h2>
             <table>
                 <tr>
                     <td>Photo</td>
@@ -26,7 +47,7 @@
                 <tr>
                 <tr v-for="signature in signatures">
                     <td>
-                        <img :src=userPhoto(signature.signatoryId) height="200" width="200">
+                        <img :src=userPhoto(signature.signatoryId) height="40" width="40">
                     </td>
                     <td>{{ signature.name }}</td>
                     <td>{{ signature.city }}</td>
