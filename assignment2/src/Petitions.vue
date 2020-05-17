@@ -9,7 +9,7 @@
                 <h4>Sort By</h4>
             </div>
             <div style="float:left" v-for="sortOption in sortOptions">
-                <input v-model="petitionSort" type="radio" name="sort" v-bind:value=sortOption.name>
+                <input v-model="petitionSort" type="radio" name="sort" v-bind:value=sortOption.name v-on:change="updateFilters()">
                 <label for=sortOption.name>{{sortOption.description}}</label><br>
             </div>
             <div style="clear:both;"></div>
@@ -20,7 +20,7 @@
                 <h4>Category</h4>
             </div>
             <div style="float:left">
-                <input v-model="petitionCategory" type="radio" name="category" v-bind:value="any">
+                <input v-model="petitionCategory" type="radio" name="category" v-bind:value="any" v-on:change="updateFilters()">
                 <label for="any">Any</label><br>
             </div>
             <div style="float:left" v-for="category in petitionCategories">
@@ -32,10 +32,23 @@
 
         <div>
             <form style="float:left" @submit.prevent v-on:submit="updateFilters(); return false;">
-                <input v-model="search" placeholder="search" />
+                <input v-model="search" placeholder="search" v-on:change="updateFilters()" />
                 <div style="clear:both;"></div>
                 <input type="submit" value="Update Filters"/>
             </form>
+            <div style="clear:both;"></div>
+        </div>
+
+        <div>
+            <div style="float:left">
+            Results per page
+            <input v-model="count" v-on:change="updateFilters()" />
+            </div>
+
+            <div style="float:left">
+            Page
+            <input type="number" v-model="page" v-on:change="updateFilters()" />
+            </div>
             <div style="clear:both;"></div>
         </div>
         
@@ -74,6 +87,9 @@ export default {
                 search: "",
                 petitionCategory: "any",
 
+                count: 10,
+                page: 1,
+
                 petitionCategories: [],
                 sortOptions: [{name:"SIGNATURES_DESC", description:"# of Signatures Descending"}, 
                             {name:"SIGNATURES_ASC", description:"# of Signatures Ascending"},
@@ -97,6 +113,8 @@ export default {
                 params.categoryId = this.petitionCategory;
             }
             params.sortBy = this.petitionSort;
+            params.startIndex = (this.page - 1) * this.count;
+            params.count = this.count;
             this.$http.get('http://localhost:4941/api/v1/petitions', {params: params})
             .then((response) => {
                 this.petitions = response.data;
