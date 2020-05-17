@@ -33,6 +33,26 @@
             {{ petition.description }}
         </div>
         <br>
+
+        <button 
+        v-if="isLoggedIn() && !signedByUser"
+        type="button" 
+        class="btn btn-primary" 
+        data-toggle="modal" 
+        data-target="#signPetitionModal"> 
+            Sign this petition
+        </button>
+
+        <button 
+        v-if="isLoggedIn() && signedByUser"
+        type="button" 
+        class="btn btn-primary" 
+        data-toggle="modal" 
+        data-target="#unsignPetitionModal"> 
+            Unsign this petition
+        </button>
+
+        <br>
         <div>
             <div style="float: left">
                 <h2>Share:</h2>
@@ -73,6 +93,68 @@
                     <td>{{ signature.country }}</td>
                 </tr>
             </table>
+        </div>
+
+        <div 
+        class="modal fade" 
+        id="signPetitionModal" 
+        tabindex="-1" 
+        role="dialog"
+        aria-labelledby="signPetitionModalLabel" 
+        aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="signPetitionModalLabel">Sign Petition</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Sign this petition:
+                        <button type="button" data-dismiss="modal" v-on:click="signPetition()">
+                            Sign
+                        </button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div 
+        class="modal fade" 
+        id="unsignPetitionModal" 
+        tabindex="-1" 
+        role="dialog"
+        aria-labelledby="unsignPetitionModalLabel" 
+        aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="unsignPetitionModalLabel">Unsign Petition</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Unsign this petition:
+                        <button type="button" data-dismiss="modal" v-on:click="unsignPetition()">
+                            Unsign
+                        </button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div 
@@ -174,16 +256,21 @@ export default {
                 petitionImageData: null,
                 petitionImageType: "",
 
-                updateImage: 0 // vue key
+                updateImage: 0, // vue key
+
+                signedByUser: false
         }
     },
 
     mounted: function() {
         this.getPetition();
-        this.getSignatures();
     },
 
     methods: {
+        isLoggedIn: function () {
+            return JSON.parse(localStorage.getItem('currentUser')) != null;
+        },
+
         userCheck: function() {
             this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
             this.ownPetition = this.currentUser.userId == this.petition.authorId;
@@ -200,10 +287,21 @@ export default {
                     this.petition.createdDate = Date(response.data.createdDate);
                 }
                 this.userCheck();
+                this.getSignatures();
             })
             .catch((error) => {
                 this.error = error;
                 this.errorFlag = true;
+            });
+        },
+
+        isSignedByUser: function () {
+            this.userCheck();
+            this.signedByUser = false;
+            this.signatures.forEach((signature) => {
+                if(signature.signatoryId == this.currentUser.userId) {
+                    this.signedByUser = true;
+                }
             });
         },
 
@@ -297,10 +395,35 @@ export default {
             });
         },
 
+        signPetition: function() {
+            this.$http.post('http://localhost:4941/api/v1/petitions/' + this.petition.petitionId + "/signatures")
+            .then((response) => {
+                alert("Signed petition");
+            })
+            .catch((error) => {
+                alert("Failed to sign petition");
+                this.error = error;
+                this.errorFlag = true;
+            });
+        },
+
+        unsignPetition: function() {
+            this.$http.delete('http://localhost:4941/api/v1/petitions/' + this.petition.petitionId + "/signatures")
+            .then((response) => {
+                alert("Unsigned petition");
+            })
+            .catch((error) => {
+                alert("Failed to unsign petition");
+                this.error = error;
+                this.errorFlag = true;
+            });
+        },
+
         getSignatures: function() {
             this.$http.get('http://localhost:4941/api/v1/petitions/' + this.$route.params.petitionId + "/signatures")
             .then((response) => {
                 this.signatures = response.data;
+                this.isSignedByUser();
             })
             .catch((error) => {
                 this.error = error;
