@@ -15,7 +15,7 @@ import Petition from './Petition.vue';
 const routes = [
     {
         path: "/",
-        component: Home
+        redirect: "/petitions"
     },
     {
         name: "petitions",

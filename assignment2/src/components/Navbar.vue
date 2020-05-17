@@ -1,7 +1,17 @@
 <template>
     <div>
-        <div style="height:auto;width:100%;display:block;background-color:#FF0000">
-            <div style="background-color:#0000FF;float:left;width:auto;">
+        <div style="height:auto;width:100%;display:block;background-color:#555555">
+            <div style="float:left;width:auto;">
+                <div style="float:left;">
+                    <router-link :to="{ name: 'petitions' }">
+                        <button
+                        type="button" 
+                        class="btn btn-primary">
+                        All Petitions
+                        </button>
+                    </router-link>
+                </div>
+
                 <div style="float:left;" v-if="loggedIn">
                     <button 
                     type="button" 
@@ -25,7 +35,7 @@
                 </div>
             </div>
 
-            <div style="float:right;background-color:#00FF00;width:auto;">
+            <div style="float:right;width:auto;">
                 <div style="float:left;" v-if="loggedIn">
                     <button 
                     type="button" 
