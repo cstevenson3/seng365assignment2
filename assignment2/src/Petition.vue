@@ -266,6 +266,10 @@ export default {
         this.getPetition();
     },
 
+    watch: {
+        '$route': 'getPetition'
+    },
+
     methods: {
         isLoggedIn: function () {
             return JSON.parse(localStorage.getItem('currentUser')) != null;
@@ -398,6 +402,7 @@ export default {
         signPetition: function() {
             this.$http.post('http://localhost:4941/api/v1/petitions/' + this.petition.petitionId + "/signatures")
             .then((response) => {
+                this.signedByUser = true;
                 alert("Signed petition");
             })
             .catch((error) => {
@@ -410,6 +415,7 @@ export default {
         unsignPetition: function() {
             this.$http.delete('http://localhost:4941/api/v1/petitions/' + this.petition.petitionId + "/signatures")
             .then((response) => {
+                this.signedByUser = false;
                 alert("Unsigned petition");
             })
             .catch((error) => {

@@ -149,7 +149,13 @@
                                 <td>Photo</td>
                             </tr>
                             <tr v-for="petition in userPetitions">
-                                <td><router-link :to="{ name: 'petition', params: { petitionId: petition.petitionId }}">{{ petition.title }}</router-link></td>
+                                <td>
+                                    <router-link :to="{ name: 'petition', params: { petitionId: petition.petitionId }}" >
+                                        <span v-on:click="closeUserPetitions();">
+                                            {{ petition.title }}
+                                        </span>
+                                    </router-link>
+                                </td>
                                 <td>{{ petition.category }}</td>
                                 <td>{{ petition.authorName }}</td>
                                 <td>{{ petition.signatureCount }}</td>
@@ -554,6 +560,10 @@ export default {
                 this.error = error;
                 this.errorFlag = true;
             });
+        },
+
+        closeUserPetitions: function() {
+            $('#userPetitionsModal').modal('toggle');
         },
 
         editUser: function () {
