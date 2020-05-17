@@ -12,6 +12,17 @@
                         Create Petition
                     </button>
                 </div>
+
+                <div style="float:left;" v-if="loggedIn">
+                    <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    v-on:click="getUserPetitions();" 
+                    data-toggle="modal" 
+                    data-target="#userPetitionsModal"> 
+                        My Petitions
+                    </button>
+                </div>
             </div>
 
             <div style="float:right;background-color:#00FF00;width:auto;">
@@ -92,6 +103,51 @@
                             <div id="result"></div>
                             <input type="submit" value="Create Petition"/>
                         </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div 
+        class="modal fade" 
+        id="userPetitionsModal" 
+        tabindex="-1" 
+        role="dialog"
+        aria-labelledby="userPetitionsModalLabel" 
+        aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="userPetitionsModalLabel">My Petitions</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>Title</td>
+                                <td>Category</td>
+                                <td>Author</td>
+                                <td>Signatures</td>
+                                <td>Photo</td>
+                            </tr>
+                            <tr v-for="petition in userPetitions">
+                                <td><router-link :to="{ name: 'petition', params: { petitionId: petition.petitionId }}">{{ petition.title }}</router-link></td>
+                                <td>{{ petition.category }}</td>
+                                <td>{{ petition.authorName }}</td>
+                                <td>{{ petition.signatureCount }}</td>
+                                <td>
+                                    <img :src=petitionPhoto(petition.petitionId) height="40" width="40">
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -251,7 +307,9 @@ export default {
 
             editImage: '',
             editImageData: null,
-            editImageType: ""
+            editImageType: "",
+
+            userPetitions: []
         }
     },
 
@@ -281,6 +339,21 @@ export default {
             localStorage.setItem('currentUser', JSON.stringify(null));
             this.$http.defaults.headers.common['X-Authorization'] = undefined;
             this.isLoggedIn();
+        },
+
+        getUserPetitions: function() {
+            this.$http.get('http://localhost:4941/api/v1/petitions', {
+                params: {
+                    authorId: this.currentUser.userId
+                }
+            })
+            .then((response) => {
+                this.userPetitions = response.data;
+            })
+            .catch((error) => {
+                this.error = error;
+                this.errorFlag = true;
+            });
         },
 
         fillCreatePetitionDetails: function() {
@@ -519,6 +592,10 @@ export default {
                 this.error = error;
                 this.errorFlag = true;
             });
+        },
+
+        petitionPhoto: function(petitionId) {
+            return "http://localhost:4941/api/v1/petitions/" + petitionId + "/photo";
         }
     }
 }
