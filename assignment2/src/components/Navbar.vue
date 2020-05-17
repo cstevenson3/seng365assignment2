@@ -306,7 +306,6 @@ export default {
             }
             data.title = this.petitionTitle;
             data.categoryId = this.petitionCategory;
-            console.log(data.categoryId);
             if(this.description != "") {
                 data.description = this.petitionDescription;
             }
@@ -437,7 +436,6 @@ export default {
                             })
                             .catch((error) => {
                                 alert("Account has been registered, but failed to upload profile image");
-                                console.log(error);
                                 this.error = error;
                                 this.errorFlag = true;
                             });
@@ -518,7 +516,6 @@ export default {
                 }
             })
             .catch((error) => {
-                console.log(error);
                 this.error = error;
                 this.errorFlag = true;
             });
