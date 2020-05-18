@@ -35,7 +35,7 @@
         <br>
 
         <button 
-        v-if="isLoggedIn() && !signedByUser"
+        v-if="isLoggedIn() && !signedByUser && Date.now() < petition.closingDate"
         type="button" 
         class="btn btn-primary" 
         data-toggle="modal" 
@@ -44,7 +44,7 @@
         </button>
 
         <button 
-        v-if="isLoggedIn() && signedByUser"
+        v-if="isLoggedIn() && signedByUser && !ownPetition && Date.now() < petition.closingDate"
         type="button" 
         class="btn btn-primary" 
         data-toggle="modal" 

@@ -262,7 +262,8 @@
                     <div class="modal-body">
                         <form @submit.prevent v-on:submit="editUser(); return false;">
                             <input v-model="editEmail" placeholder="email" />
-                            <input v-model="editPassword" placeholder="password" type="password" />
+                            <input v-model="editPassword" placeholder="new password" type="password" />
+                            <input v-model="editCurrentPassword" placeholder="current password" type="password" />
                             <input v-model="editName" placeholder="name" />
                             <input v-model="editCity" placeholder="city" />
                             <input v-model="editCountry" placeholder="country" />
@@ -607,6 +608,9 @@ export default {
 
             if(this.editPassword != "") {
                 data.password = this.editPassword;
+                if(this.editCurrentPassword != "") {
+                    data.currentPassword = this.editCurrentPassword;
+                }
             }
             if(this.editCity != "") {
                 data.city = this.editCity;
