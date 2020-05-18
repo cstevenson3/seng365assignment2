@@ -118,8 +118,14 @@ export default {
             this.$http.get('http://localhost:4941/api/v1/petitions', {params: params})
             .then((response) => {
                 this.petitions = response.data;
+                if(this.petitions.length == 0 && this.page != 0) {
+                    alert("No more pages");
+                    this.page -= 1;
+                    this.getPetitions();
+                }
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -131,6 +137,7 @@ export default {
                 this.petitionCategories = categoriesResponse.data;
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });

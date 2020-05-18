@@ -76,7 +76,7 @@
         </div
         <br>
         <div>
-            <h2>Signatures</h2>
+            <h2>Signatures ({{petition.signatureCount}} total)</h2>
             <table>
                 <tr>
                     <td>Photo</td>
@@ -294,6 +294,7 @@ export default {
                 this.getSignatures();
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -320,6 +321,7 @@ export default {
                 }
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -356,6 +358,9 @@ export default {
             if(this.description != "") {
                 data.description = this.petitionDescription;
             }
+            if(this.petitionClosingDate != "") {
+                data.closingDate = (new Date(this.petitionClosingDate)).toJSON().slice(0,10) + " 00:00:00.000";
+            }
             let uploadImage = false;
             if(this.petitionImageData != null) {
                 uploadImage = true;
@@ -371,6 +376,7 @@ export default {
                         alert("Petition updated successfully");
                     })
                     .catch((error) => {
+                        alert(error.response.statusText);
                         this.getPetition();
                         this.error = error;
                         this.errorFlag = true;
@@ -383,6 +389,7 @@ export default {
                 $('#editPetitionModal').modal('toggle');
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -394,6 +401,7 @@ export default {
                 window.location.href = "/petitions";
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -406,6 +414,7 @@ export default {
                 alert("Signed petition");
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 alert("Failed to sign petition");
                 this.error = error;
                 this.errorFlag = true;
@@ -419,6 +428,7 @@ export default {
                 alert("Unsigned petition");
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 alert("Failed to unsign petition");
                 this.error = error;
                 this.errorFlag = true;
@@ -432,6 +442,7 @@ export default {
                 this.isSignedByUser();
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });

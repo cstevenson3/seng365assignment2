@@ -367,6 +367,7 @@ export default {
                 this.userPetitions = response.data;
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -378,6 +379,7 @@ export default {
                 this.petitionCategories = categoriesResponse.data;
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -409,12 +411,24 @@ export default {
 
             this.$http.post('http://localhost:4941/api/v1/petitions', data)
             .then((petitionResponse) => {
+                this.$http.post('http://localhost:4941/api/v1/petitions/' + petitionResponse.data.petitionId + "/signatures")
+                .then((response) => {
+                    this.signedByUser = true;
+                })
+                .catch((error) => {
+                    alert(error.response.statusText);
+                    alert("Failed to sign new petition");
+                    this.error = error;
+                    this.errorFlag = true;
+                });
                 if(uploadImage) {
                     this.$http.put('http://localhost:4941/api/v1/petitions/' + petitionResponse.data.petitionId + '/photo', this.petitionImageData, {headers: {"Content-Type": this.petitionImageType}})                            
                     .then((imageResponse) => {
                         window.location.href = '/petitions/' + petitionResponse.data.petitionId;
                     })
                     .catch((error) => {
+                        alert(error.response.statusText);
+                        alert("Failed to upload petition image");
                         this.error = error;
                         this.errorFlag = true;
                         window.location.href = '/petitions/' + petitionResponse.data.petitionId;
@@ -424,6 +438,7 @@ export default {
                 }
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -438,11 +453,13 @@ export default {
                     $('#loginUserModal').modal('toggle');
                 })
                 .catch((error) => {
+                    alert(error.response.statusText);
                     this.error = error;
                     this.errorFlag = true;
                 });
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -528,6 +545,7 @@ export default {
                                 //image uploaded
                             })
                             .catch((error) => {
+                                alert(error.response.statusText);
                                 alert("Account has been registered, but failed to upload profile image");
                                 this.error = error;
                                 this.errorFlag = true;
@@ -536,16 +554,19 @@ export default {
                         $('#registerUserModal').modal('toggle');
                     })
                     .catch((error) => {
+                        alert(error.response.statusText);
                         this.error = error;
                         this.errorFlag = true;
                     });
                 })
                 .catch((error) => {
+                    alert(error.response.statusText);
                     this.error = error;
                     this.errorFlag = true;
                 });
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -561,6 +582,7 @@ export default {
                 this.editCountry = userResponse.data.country ? userResponse.data.country : "";
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
@@ -606,6 +628,7 @@ export default {
                         alert("New image saved");
                     })
                     .catch((error) => {
+                        alert(error.response.statusText);
                         alert("Failed to upload profile image");
                         this.error = error;
                         this.errorFlag = true;
@@ -613,6 +636,7 @@ export default {
                 }
             })
             .catch((error) => {
+                alert(error.response.statusText);
                 this.error = error;
                 this.errorFlag = true;
             });
