@@ -398,6 +398,10 @@ export default {
             if(this.description != "") {
                 data.description = this.petitionDescription;
             }
+            if(this.petitionClosingDate != "") {
+                data.closingDate = (new Date(this.petitionClosingDate)).toJSON().slice(0,10) + " 00:00:00.000";
+            }
+
             let uploadImage = false;
             if(this.petitionImageData != null) {
                 uploadImage = true;

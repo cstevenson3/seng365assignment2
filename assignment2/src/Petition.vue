@@ -27,7 +27,7 @@
             <h1>{{ petition.title }}</h1>
             <h2>{{ petition.category }}</h2>
             <h3> {{ petition.closingDate ? "Closes " + petition.closingDate : "Closing date not set" }}</h3>
-            <h3>Opened {{ Date(petition.createdDate) }}</h3>
+            <h3>Opened {{ petition.createdDate }}</h3>
             <img :key=updateImage :src=petitionPhoto(petition.petitionId) height="200" width="200">
             <br>
             {{ petition.description }}
@@ -285,10 +285,10 @@ export default {
             .then((response) => {
                 this.petition = response.data;
                 if(response.data.closingDate) {
-                    this.petition.closingDate = Date(response.data.closingDate);
+                    this.petition.closingDate = new Date(response.data.closingDate);
                 }
                 if(response.data.createdDate) {
-                    this.petition.createdDate = Date(response.data.createdDate);
+                    this.petition.createdDate = new Date(response.data.createdDate);
                 }
                 this.userCheck();
                 this.getSignatures();
